@@ -6,6 +6,7 @@ from .settings import *
 
 class BoardFrame:
     def __init__(self, root: Tk):
+        self.root = root
         self.frame = Frame(
             root,
             bg=BACKGROUND_COLOR,
@@ -30,7 +31,7 @@ class BoardFrame:
         self._draw_palace(8)
 
     def _draw_board(self):
-        for column in range(NUMBER_OF_COLUMNS):   
+        for column in range(NUMBER_OF_COLUMNS):
             for row in range(NUMBER_OF_ROWS):
                 if column in [0, 9] or row in [0, 10]:
                     continue
@@ -78,10 +79,11 @@ class BoardFrame:
         return ImageTk.PhotoImage(image)
 
     def _get_grid_position_from_event(self, event: Event):
-        x, y = event.x_root, event.y_root + 5
-        column = x // CELL_SIZE
-        row = y // CELL_SIZE
-        return int(column), int(row - 1)
+        x, y = event.x, event.y
+
+        column = x / CELL_SIZE
+        row = y / CELL_SIZE
+        return round(column), round(row)
 
     def _get_absolute_position(self, column: int, row: int):
         x = column * CELL_SIZE
@@ -90,7 +92,7 @@ class BoardFrame:
 
     def _place_piece(self, image: ImageTk.PhotoImage, column: int, row: int):
         x, y = self._get_absolute_position(column, row)
-        return self.canvas.create_image(x, y, image=image)
+        return self.canvas.create_image(x, y, image=image, tags=PIECES_TAG)
 
     def _move_piece(self, piece_id: str, column: int, row: int):
         x, y = self._get_absolute_position(column, row)
@@ -99,8 +101,17 @@ class BoardFrame:
     def _get_current_piece(self):
         return self.canvas.find_withtag(CURRENT_TAG)[0]
 
-    def _delete_piece(self, piece_id: str):
+    def _delete_piece(self, piece_id: str | int):
         self.canvas.delete(piece_id)
+
+    def _get_piece_on_square(self, column: int, row: int):
+        x, y = self._get_absolute_position(column, row)
+        items = self.canvas.find_overlapping(x, y, x, y)
+
+        pieces = self.canvas.find_withtag(PIECES_TAG)
+        for item_id in items:
+            if item_id in pieces:
+                return item_id
 
     def _place_dot(self, column: int, row: int):
         x, y = self._get_absolute_position(column, row)
@@ -109,7 +120,7 @@ class BoardFrame:
             y - DOT_WIDTH,
             x + DOT_WIDTH,
             y + DOT_WIDTH + 2,
-            fill=GRID_COLOR,
+            fill=DOT_COLOR,
             tags=DOTS_TAG,
         )
 

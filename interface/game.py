@@ -5,8 +5,8 @@ from .settings import *
 
 
 class GameInterface:
-    def __init__(self):
-        self.root = Tk()
+    def __init__(self, root: Tk):
+        self.root = root
         self._initialize_window()
         self._initialize_menu()
         self.board_interface = BoardFrame(self.root)
@@ -32,5 +32,4 @@ class GameInterface:
     def run(self):
         self.board_interface.frame.pack(side=LEFT, fill=BOTH)
         self.control_interface.frame.pack(side=RIGHT, fill=BOTH, expand=True)
-
-        self.root.mainloop()
+        # self.root.mainloop()
