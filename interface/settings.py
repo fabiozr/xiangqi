@@ -27,12 +27,14 @@ BOARD_COLOR = "#c05832"
 NUMBER_OF_COLUMNS = 10  # 9 columns + 1 for the frame
 NUMBER_OF_ROWS = 11  # 10 rows + 1 for the frame
 GRID_COLOR = "#190c06"
+DOT_COLOR = "#692947"
 
 # Board cell settings
 CELL_SIZE = BOARD_SIZE / NUMBER_OF_COLUMNS
-CELL_WIDTH = 2
-DOT_WIDTH = 5
+CELL_WIDTH = CELL_SIZE / 20
+DOT_WIDTH = CELL_SIZE / 9
 
 # Board canvas tags
 DOTS_TAG = "dots"
+PIECES_TAG = "pieces"
 CURRENT_TAG = "current"

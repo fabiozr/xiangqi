@@ -1,73 +1,83 @@
+# Temporary file to test the game, will be replaced by the player actor
+
 from tkinter import *
 from interface.game import GameInterface
 from interface.settings import *
 
-# O CÓDIGO ABAIXO É APENAS UM EXEMPLO DE COMO USAR A INTERFACE. SUBSTITER PELA ATOR JOGADOR/CLASSES DO DOMINIO DO POBLEMA
 
-# Initialize the game board
-game_interface = GameInterface()
-board = game_interface.board_interface
+class Game(Tk):
+    def __init__(self):
+        super().__init__()
+        self.game_interface = GameInterface(self)
+        self.board = self.game_interface.board_interface
+        self.image_black_path = "images/Pawn-Black.png"
+        self.image_black = self.board._load_image(self.image_black_path)
+        self.image_red_path = "images/Pawn-Red.png"
+        self.image_red = self.board._load_image(self.image_red_path)
+        self.board_state = [
+            [1, 1, 1, 1, 1, 1, 1, 1, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 1, 0, 0, 0, 0, 0, 1, 0],
+            [1, 0, 1, 0, 1, 0, 1, 0, 1],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 0, 1, 0, 1, 0, 1, 0, 1],
+            [0, 1, 0, 0, 0, 0, 0, 1, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1, 1, 1],
+        ]
+        self.run()
 
-# Load the image for the game piece
-image_path = "images/Pawn-Black.png"
-image = board._load_image(image_path)
+    def place_pieces(self):
+        for i, row in enumerate(self.board_state):
+            for j, cell in enumerate(row):
+                if cell == 1:
+                    self.image = self.image_black if i < 5 else self.image_red
+                    piece = self.board._place_piece(self.image, j + 1, i + 1)
+                    self.board_state[i][j] = piece
 
-# Define the initial state of the game pieces on the board
-board_state = [
-    [1, 1, 1, 1, 1, 1, 1, 1, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 1, 0, 0, 0, 0, 0, 1, 0],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 0, 1, 0, 1, 0, 1, 0, 1],
-    [0, 1, 0, 0, 0, 0, 0, 1, 0],
-    [0, 0, 0, 0, 0, 0, 0, 0, 0],
-    [1, 1, 1, 1, 1, 1, 1, 1, 1],
-]
+    def show_moves(self, event: Event):
+        self.board._delete_dots()
+        piece = self.board._get_current_piece()
+        column, row = self.board._get_grid_position_from_event(event)
+        dots = self.place_dots_on_board(column, row)
+        for dot in dots:
+            self.board._make_clickable(dot, lambda event: self.move_piece(event, piece))
 
-# Place the pieces on the board according to the initial state
-for i, row in enumerate(board_state):
-    for j, cell in enumerate(row):
-        if cell == 1:
-            piece = board._place_piece(image, j + 1, i + 1)
-            board_state[i][j] = piece
+    def place_dots_on_board(self, column: int, row: int):
+        dots_in_column = [
+            self.board._place_dot(column, i)
+            for i in range(1, NUMBER_OF_ROWS)
+            if i != row
+        ]
+        dots_in_row = [
+            self.board._place_dot(j, row)
+            for j in range(1, NUMBER_OF_COLUMNS)
+            if j != column
+        ]
+        return dots_in_column + dots_in_row
 
+    def move_piece(self, event: Event, piece):
+        column, row = self.board._get_grid_position_from_event(event)
+        piece_on_square = self.board._get_piece_on_square(column, row)
+        if piece_on_square and piece_on_square != piece:
+            self.board._delete_piece(piece_on_square)
+        self.board._move_piece(piece, column, row)
+        self.board._delete_dots()
 
-# Define the function to show possible moves
-def show_moves(event: Event):
-    board._delete_dots()
-    piece = board._get_current_piece()
-    column, row = board._get_grid_position_from_event(event)
-    dots = place_dots_on_board(column, row)
-    for dot in dots:
-        board._make_clickable(dot, lambda event: move_piece(event, piece))
+    def add_click_handlers(self):
+        for i, row in enumerate(self.board_state):
+            for j, cell in enumerate(row):
+                if cell != 0:
+                    piece = cell
+                    self.board._make_clickable(piece, self.show_moves)
 
-
-# Define the function to place dots on the board
-def place_dots_on_board(column: int, row: int):
-    dots_in_column = [
-        board._place_dot(column, i) for i in range(1, NUMBER_OF_ROWS) if i != row
-    ]
-    dots_in_row = [
-        board._place_dot(j, row) for j in range(1, NUMBER_OF_COLUMNS) if j != column
-    ]
-    return dots_in_column + dots_in_row
-
-
-# Define the function to move a piece
-def move_piece(event: Event, piece):
-    column, row = board._get_grid_position_from_event(event)
-    board._move_piece(piece, column, row)
+    def run(self):
+        self.place_pieces()
+        self.add_click_handlers()
+        self.game_interface.run()
 
 
-# Add click event handlers to the pieces
-for i, row in enumerate(board_state):
-    for j, cell in enumerate(row):
-        if cell != 0:
-            piece = cell
-            board._make_clickable(piece, show_moves)
-
-
-# board.run()
-game_interface.run()
+if __name__ == "__main__":
+    game = Game()
+    game.mainloop()
