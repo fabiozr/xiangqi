@@ -7,18 +7,17 @@ from tkinter import *
 from tkinter import messagebox
 from PIL import Image, ImageTk
 
-# from player_interface import PlayerInterface
 from .settings import *
-# from ..player_interface import PlayerInterface
-class PlayerInterface:
-    pass
+
+from dog.dog_interface import DogPlayerInterface
+
 class GameInterface(Tk):
-    player_interface: PlayerInterface
+    player_interface: DogPlayerInterface
     frame: Frame
     canvas: Canvas
     images: dict[str, PhotoImage]
     
-    def __init__(self, player_interface: PlayerInterface):
+    def __init__(self, player_interface: DogPlayerInterface):
         super().__init__()
         
         self._initialize_window()

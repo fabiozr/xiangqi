@@ -5,7 +5,11 @@ from dog.start_status import StartStatus
 from uuid import uuid4
 
 class PlayerInterface(DogPlayerInterface):
-    
+    game_interface: GameInterface
+    dog_sever_interface: DogActor
+    player_name: str
+
+
     def __init__(self):
         self.game_interface = GameInterface(self)
 

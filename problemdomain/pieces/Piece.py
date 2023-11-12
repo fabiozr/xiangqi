@@ -2,22 +2,25 @@ from problemdomain.Player import Player
 from problemdomain.Position import Position
 
 
-class Piece():
-	def __init__(self, player: Player):
-		self._player = player
-		self._possible_moves = None
+class Piece:
+    _player: Player
+    _possible_moves: list[Position]
 
-	def verifyValidPosition(self, position: Position) -> bool:
-		return position in self._possible_moves
+    def __init__(self, player: Player):
+        self._player = player
+        self._possible_moves = None
 
-	def getPlayer(self) -> Player:
-		return self._player
+    def verifyValidPosition(self, position: Position) -> bool:
+        return position in self._possible_moves
 
-	def getReachablePositions(self, position: Position, matrix_board: list[list]) -> list[list]:
-		pass
+    def getPlayer(self) -> Player:
+        return self._player
 
-	def setPossiblePosition(self, positions:  list[list]):
-		self._possible_moves = positions
+    def getReachablePositions(self, position: Position, matrix_board: list[list]) -> list[list]:
+        pass
+
+    def setPossiblePosition(self, positions:  list[Position]):
+        self._possible_moves = positions
 
 
 

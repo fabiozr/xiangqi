@@ -4,94 +4,101 @@ from problemdomain.pieces.Piece import Piece
 from problemdomain.Position import Position
 
 class Board:
-	def __init__(self, local_player: Player, remote_player: Player, player_interface: PlayerInterface):
-		self._local_player = local_player
-		self._remote_player = remote_player
-		self._positions = [[]]
-		self._match_in_progress = False
-		self._winner = None
-		self._player_interface = player_interface
+    _local_player: Player
+    _remote_player: Player
+    _positions: list[list[Position]]
+    _match_in_progress: bool
+    _winner: Player
+    _player_interface: PlayerInterface
 
-	# Métodos relacionados ao jogo
-	def initialize_position_matrix(self) -> list[list]:
-		pass
+    def __init__(self, local_player: Player, remote_player: Player, player_interface: PlayerInterface):
+        self._local_player = local_player
+        self._remote_player = remote_player
+        self._positions = [[]]
+        self._match_in_progress = False
+        self._winner = None
+        self._player_interface = player_interface
 
-	def finishMatch(self):
-		pass
+    # Métodos relacionados ao jogo
+    def initialize_position_matrix(self) -> list[list]:
+        pass
 
-	def startMatch(self, local_player: str, remote_player: str):
-		pass
+    def finishMatch(self):
+        pass
 
-	def setWinner(self, player: Player):
-		pass
+    def startMatch(self, local_player: str, remote_player: str):
+        pass
 
-	def evaluateMatchFinish(self) -> bool:
-		pass
+    def setWinner(self, player: Player):
+        pass
 
-	def changeTurn(self):
-		pass
+    def evaluateMatchFinish(self) -> bool:
+        pass
 
-	def selectPosition(self, line: int, column: int):
-		pass
+    def changeTurn(self):
+        pass
 
-	def makeMove(self, move: dict):
-		pass
+    def selectPosition(self, line: int, column: int):
+        pass
 
-	def receiveMove(self, move: dict):
-		pass
+    def makeMove(self, move: dict):
+        pass
 
-	def getMatchInProgress(self) -> bool:
-		pass
+    def receiveMove(self, move: dict):
+        pass
 
-	# Métodos relacionados às peças e posições
-	def calculatePossiblePositions(self, piece: Piece, verify_check: bool, verify_protected: bool) -> list[Position]:
-		pass
+    def getMatchInProgress(self) -> bool:
+        pass
 
-	def __movePiece(self, piece: Piece, destiny: Position):
-		pass
+    # Métodos relacionados às peças e posições
+    def calculatePossiblePositions(self, piece: Piece, verify_check: bool, verify_protected: bool) -> list[Position]:
+        pass
 
-	def __selectPiece(self, piece: Piece):
-		pass
+    def __movePiece(self, piece: Piece, destiny: Position):
+        pass
 
-	def __placePiece(self, origin: tuple, destiny: tuple):
-		pass
+    def __selectPiece(self, piece: Piece):
+        pass
 
-	def __getPosition(self, line: int, column: int) -> Position:
-		pass
+    def __placePiece(self, origin: tuple, destiny: tuple):
+        pass
 
-	def getAllPieces(self) -> list[Piece]:
-		pass
+    def __getPosition(self, line: int, column: int) -> Position:
+        pass
 
-	def getPlayerPieces(self, player: Player) -> list[Piece]:
-		pass
+    def getAllPieces(self) -> list[Piece]:
+        pass
 
-	def getAttackedPieces(self, coordinates: tuple) -> list[Piece]:
-		pass
+    def getPlayerPieces(self, player: Player) -> list[Piece]:
+        pass
 
-	def getPiecePosition(self, piece: Piece) -> Position:
-		pass
+    def getAttackedPieces(self, coordinates: tuple) -> list[Piece]:
+        pass
 
-	# Métodos de verificação
-	def verifyCheck(self, player: Player) -> bool:
-		pass
+    def getPiecePosition(self, piece: Piece) -> Position:
+        pass
 
-	def verifyDraw(self) -> bool:
-		pass
+    # Métodos de verificação
+    def verifyCheck(self, player: Player) -> bool:
+        pass
 
-	def verifyWinner(self) -> bool:
-		pass
+    def verifyDraw(self) -> bool:
+        pass
 
-	def verifyPositionOccupiedByPlayer(self, destiny: Position, player: Player) -> bool:
-		pass
+    def verifyWinner(self) -> bool:
+        pass
 
-	def verifyConsecutiveChecks(self, destiny: Position, piece: Piece) -> bool:
-		pass
+    def verifyPositionOccupiedByPlayer(self, destiny: Position, player: Player) -> bool:
+        pass
 
-	def verifyPieceThreat(self, destiny: Position, piece: Piece) -> bool:
-		pass
+    def verifyConsecutiveChecks(self, destiny: Position, piece: Piece) -> bool:
+        pass
 
-	def verifyIfPositionIsProtected(self, pos: Position, player: Player) -> bool:
-		pass
+    def verifyPieceThreat(self, destiny: Position, piece: Piece) -> bool:
+        pass
 
-	def verifyVisibleKings(self) -> bool:
-		pass
+    def verifyIfPositionIsProtected(self, pos: Position, player: Player) -> bool:
+        pass
+
+    def verifyVisibleKings(self) -> bool:
+        pass
