@@ -94,8 +94,8 @@ class Board:
 
         remote_color = Color.RED if local_color == Color.BLACK else Color.BLACK
 
-        self._local_player = Player(local_player, True, local_color)
-        self._remote_player = Player(remote_player, True, remote_color)
+        self._local_player = Player(local_player, local_turn, local_color)
+        self._remote_player = Player(remote_player, not local_turn, remote_color)
 
         self._positions = self.initialize_position_matrix()
         
