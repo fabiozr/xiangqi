@@ -4,7 +4,7 @@ if TYPE_CHECKING:
     from problemdomain.Player import Player
     from problemdomain.Position import Position
 
-class Bishop(Piece):
+class Elephant(Piece):
     def __init__(self, player: "Player"):
         super().__init__(player)
 
