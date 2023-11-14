@@ -119,16 +119,29 @@ class GameInterface(Tk):
                     self.board_state[i][j] = piece
         self.add_click_handlers()
 
-    def show_moves(self, event: Event):
+    def clickPosition(self, event: Event):
         self._delete_dots()
-        piece = self._get_current_piece()
         column, row = self._get_grid_position_from_event(event)
-        dots = self.place_dots_on_board(column, row)
-        for dot in dots:
-            self._make_clickable(dot, lambda event: self.move_piece(event, piece))
+        self.player_interface.selectPosition(row, column)
 
-    def showValidPostions(self, positions: list):
+    def updateInterfaceMove(self, origin: tuple[int, int], destiny: tuple[int, int]):
+        piece_origin = self._get_piece_on_square(origin[1]+1, origin[0]+1)
+        piece_destiny = self._get_piece_on_square(destiny[1]+1, destiny[0]+1)
+
+        self.board_state[destiny[0]][destiny[1]] = self.board_state[origin[0]][origin[1]]
+        self.board_state[origin[0]][origin[1]] = 0
+
+        if piece_destiny and piece_origin != piece_destiny:
+            self._delete_piece(piece_destiny)
+
+        self._move_piece(piece_origin, destiny[1]+1, destiny[0]+1)
         self._delete_dots()
+
+
+    def showValidPosition(self, positions: list[tuple[int, int]]):
+        for row, column in positions:
+            dot = self._place_dot(column + 1, row + 1)
+            self._make_clickable(dot, self.clickPosition)
 
     def place_dots_on_board(self, column: int, row: int):
         dots_in_column = [
@@ -164,7 +177,7 @@ class GameInterface(Tk):
             for j, cell in enumerate(row):
                 if cell != 0:
                     piece = cell
-                    self._make_clickable(piece, self.show_moves)
+                    self._make_clickable(piece, self.clickPosition)
 
     def run(self):
         self.frame.pack(side=LEFT, fill=BOTH)
@@ -258,6 +271,7 @@ class GameInterface(Tk):
         items = self.canvas.find_overlapping(x, y, x, y)
 
         pieces = self.canvas.find_withtag(PIECES_TAG)
+
         for item_id in items:
             if item_id in pieces:
                 return item_id
