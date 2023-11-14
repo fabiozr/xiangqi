@@ -20,7 +20,7 @@ class Piece:
 
     def getReachablePositions(
         self, position: "Position", matrix_board: list[list]
-    ) -> list[list]:
+    ) -> list["Position"]:
         pass
 
     def setPossiblePosition(self, positions: list["Position"]):
