@@ -47,7 +47,7 @@ class PlayerInterface(DogPlayerInterface):
         message = start_status.get_message()
         
 
-        if code in (0, 1):
+        if code in ('0', '1'):
             self.game_interface.showMessage(message)
         else:
 
@@ -56,14 +56,14 @@ class PlayerInterface(DogPlayerInterface):
             self.dog_sever_interface.send_move({"type": "start", "value": other_color, "match_status": "next"})
             self.initializeMatch(start_status, color)
 
-        
+
 
     def receive_start(self, start_status: StartStatus):
         begin = time()
         color = None
         while time() - begin < 60:
             self.dog_sever_interface.proxy.match_status()
-            
+
             try:
                 color = self.queue.get_nowait()
                 break
@@ -84,11 +84,20 @@ class PlayerInterface(DogPlayerInterface):
         self.game_interface.setLocalColor(color)
         self.game_interface.placeBoardPieces()
 
-    
     def receive_move(self, a_move: dict[str, str]):
         if a_move.get("type") == "start":
             self.queue.put(a_move["value"])
             return
+
+    def selectPosition(self, line: int, column: int):
+        self.board.selectPosition(line, column)
+
+    def showValidPositions(self, positions: list[tuple[int, int]]):
+        self.game_interface.showValidPosition(positions)
+
+    def updateInterfaceMove(self, origin: tuple[int, int], destiny: tuple[int, int]):
+        self.game_interface.updateInterfaceMove(origin, destiny)
+
 
     
 
