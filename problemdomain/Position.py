@@ -17,6 +17,3 @@ class Position:
 
     def getCoordenates(self) -> tuple:
         return self._coordenates
-
-
-

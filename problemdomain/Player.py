@@ -40,5 +40,3 @@ class Player:
         if len(self._last_three_moves) >= 3:
             self._last_three_moves.pop(0)
         self._last_three_moves.append(move)
-
-
