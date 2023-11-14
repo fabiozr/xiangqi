@@ -15,5 +15,8 @@ class Position:
     def getPiece(self) -> Piece:
         return self._piece
 
+    def setPiece(self, piece: Piece):
+        self._piece = piece
+
     def getCoordenates(self) -> tuple:
         return self._coordenates
