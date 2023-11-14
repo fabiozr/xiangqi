@@ -81,7 +81,8 @@ class PlayerInterface(DogPlayerInterface):
     def initializeMatch(self, start_status: StartStatus, color: str):
         local_player, remote_player = start_status.get_players()
         self.board.startMatch(local_player, remote_player, color)
-        self.game_interface.placeBoardPieces(color)
+        self.game_interface.setLocalColor(color)
+        self.game_interface.placeBoardPieces()
 
     
     def receive_move(self, a_move: dict[str, str]):
