@@ -30,6 +30,9 @@ class Player:
     def getTurn(self) -> bool:
         return self._turn
 
+    def setTurn(self, turn: bool):
+        self._turn = turn
+
     def getMoves(self) -> list[Move]:
         return self._last_three_moves
 

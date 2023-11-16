@@ -88,6 +88,17 @@ class PlayerInterface(DogPlayerInterface):
         if a_move.get("type") == "start":
             self.queue.put(a_move["value"])
             return
+        elif a_move.get("type") == "move":
+            self.board.makeMove({'origin': self.convertCoordinates(a_move['origin']),
+                                 'destiny': self.convertCoordinates(a_move['destiny'])})
+
+    def convertCoordinates(self, coord: tuple[int, int]):
+        x, y = coord
+        return 9 - x, 8 - y
+
+    def sendMove(self, move: dict):
+        self.dog_sever_interface.send_move({"type": "move", "origin": move['origin'],
+                                            'destiny': move['destiny'], "match_status": "next"})
 
     def selectPosition(self, line: int, column: int):
         self.board.selectPosition(line, column)

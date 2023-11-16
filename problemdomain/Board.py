@@ -107,7 +107,12 @@ class Board:
         pass
 
     def changeTurn(self):
-        pass
+        if self._local_player.getTurn() == True:
+            self._local_player.setTurn(False)
+            self._remote_player.setTurn(True)
+        else:
+            self._local_player.setTurn(True)
+            self._remote_player.setTurn(False)
 
     def selectPosition(self, line: int, column: int):
         position = self.__getPosition(line - 1, column - 1)
@@ -143,6 +148,7 @@ class Board:
         self.__placePiece(origin, destiny)
         self._local_player.setPiece(None)
         self._player_interface.updateInterfaceMove(origin, destiny)
+        self.changeTurn()
 
     def receiveMove(self, move: dict):
         pass
@@ -165,6 +171,7 @@ class Board:
             cord_destiny = destiny.getCoordenates()
 
             self.makeMove({'origin': cord_origin, 'destiny': cord_destiny})
+            self._player_interface.sendMove({'origin': cord_origin, 'destiny': cord_destiny})
 
     def __selectPiece(self, piece: Piece):
         self._local_player.setPiece(piece)
