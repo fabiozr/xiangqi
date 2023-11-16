@@ -1,7 +1,7 @@
 from problemdomain.Color import Color
 from problemdomain.pieces.Piece import Piece
 
-
+from typing import Optional
 class Position:
     _color: Color
     _piece: Piece
@@ -12,7 +12,7 @@ class Position:
         self._piece = piece
         self._coordenates = coordenates
 
-    def getPiece(self) -> Piece:
+    def getPiece(self) -> Optional[Piece]:
         return self._piece
 
     def setPiece(self, piece: Piece):

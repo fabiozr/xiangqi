@@ -3,10 +3,10 @@ from problemdomain.pieces.Piece import Piece
 
 
 class Move:
-    origin: Position
-    destiny: Position
-    check: bool
-    attacked_pieces: list[Piece]
+    _origin: Position
+    _destiny: Position
+    _check: bool
+    _attacked_pieces: list[Piece]
 
     def __init__(
         self,
@@ -25,3 +25,6 @@ class Move:
 
     def getOrigin(self) -> Position:
         return self._origin
+    
+    def getCheck(self) -> bool:
+        return self._check

@@ -19,7 +19,20 @@ class Player:
         self._select_piece = None
 
     def verifyCheckOnLastThreeMoves(self, desnity: Position) -> bool:
-        pass
+        curr_destiny = desnity
+        check_on_last_three_moves = True
+
+        for move in self._last_three_moves[::-1]:
+            prev_check = move.getCheck()
+            prev_origin = move.getOrigin()
+
+            if prev_origin == curr_destiny and prev_check:
+                curr_destiny = prev_origin
+            else:
+                check_on_last_three_moves = False
+                break
+        
+        return check_on_last_three_moves
 
     def getPiece(self) -> Piece:
         return self._select_piece

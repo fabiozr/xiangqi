@@ -104,7 +104,7 @@ class Board:
         pass
 
     def evaluateMatchFinish(self) -> bool:
-        pass
+        ...
 
     def changeTurn(self):
         if self._local_player.getTurn() == True:
@@ -190,10 +190,21 @@ class Board:
         return self._positions[line][column]
 
     def getAllPieces(self) -> list[Piece]:
-        pass
+        pieces = []
+        for line in self._positions:
+            for pos in line:
+                if pos.getPiece():
+                    pieces.append(pos.getPiece())
+        return pieces
+
 
     def getPlayerPieces(self, player: Player) -> list[Piece]:
-        pass
+        pieces = []
+        for line in self._positions:
+            for pos in line:
+                if pos.getPiece() and pos.getPiece().getPlayer() == player:
+                    pieces.append(pos.getPiece())
+        return pieces
 
     def getAttackedPieces(self, coordinates: tuple) -> list[Piece]:
         pass
@@ -207,25 +218,99 @@ class Board:
 
     # Métodos de verificação
     def verifyCheck(self, player: Player) -> bool:
-        pass
+        king_pos = None
+        for line in (0, 1, 2, 7, 8, 9):
+            for column in range(3, 6):
+                pos = self._positions[line][column]
+                piece = pos.getPiece()
+
+                if isinstance(piece, King):
+                    piece_player = piece.getPlayer()
+                    if piece_player == player:
+                        king_pos = pos
+        
+        opponent_pieces = None
+        if player == self._local_player:
+            opponent_pieces = self.getPlayerPieces(self._remote_player)
+        else:
+            opponent_pieces = self.getPlayerPieces(self._local_player)
+        
+        for piece in opponent_pieces:
+            posible_positions = self.calculatePossiblePositions(piece, False, False)
+            for pos in posible_positions:
+                if king_pos == pos:
+                    return True
+        
+        return False
+
 
     def verifyDraw(self) -> bool:
-        pass
+        for piece in self.getAllPieces():
+            if piece in (Cannon, Horse, Rook, Pawn):
+                return False
+        return True
 
     def verifyWinner(self) -> bool:
-        pass
+        player_not_in_turn = self._local_player if not self._local_player.getTurn() else self._remote_player
+
+        for piece in self.getPlayerPieces(player_not_in_turn):
+            if len(self.calculatePossiblePositions(piece)) == 0:
+                return True
+        return False
 
     def verifyPositionOccupiedByPlayer(self, destiny: Position, player: Player) -> bool:
-        pass
+        other_piece = destiny.getPiece()
+        other_player = other_piece.getPlayer() if other_piece else None
+        return player == other_player
+
 
     def verifyConsecutiveChecks(self, destiny: Position, piece: Piece) -> bool:
-        pass
+        player = piece.getPlayer()
+        other_player = self._local_player if player != self._local_player else self._remote_player
+        other_check = self.verifyCheck(other_player)
+        consecutive_checks = player.verifyCheckOnLastThreeMoves(destiny)
+
+        return other_check and consecutive_checks
 
     def verifyPieceThreat(self, destiny: Position, piece: Piece) -> bool:
-        pass
+        player = piece.getPlayer()
+        protected = self.verifyIfPositionIsProtected(destiny, player)
+
+        attacked_piece = destiny.getPiece()
+        last_move = player.getMoves()[-1]
+        
+        last_move_attacked_pieces = last_move.getAttackedPiecies()
+        last_move_origin = last_move.getOrigin()
+
+        return protected and attacked_piece in last_move_attacked_pieces and destiny.getCoordenates() == last_move_origin.getCoordenates()
 
     def verifyIfPositionIsProtected(self, pos: Position, player: Player) -> bool:
-        pass
+        other_player = self._local_player if self._local_player != player else self._remote_player
+        pieces = self.getPlayerPieces(other_player)
+
+        protected = False
+        for piece in pieces:
+            reachable_positions = self.calculatePossiblePositions(piece, True, False)
+
+            if pos in reachable_positions:
+                protected = True
+                break
+        
+        return protected
+
 
     def verifyVisibleKings(self) -> bool:
-        pass
+        for line in range(0, 3):
+            for column in range(3, 6):
+                pos = self._positions[line][column]
+                piece = pos.getPiece()
+
+                if isinstance(piece, King):
+                    for line_to_view in range(line+1, 10):
+                        pos_to_view = self._positions[line_to_view][column]
+                        piece_to_view = pos_to_view.getPiece()
+
+                        if isinstance(piece_to_view, King):
+                            return True
+                        if piece_to_view and not isinstance(piece_to_view, King):
+                            return False
