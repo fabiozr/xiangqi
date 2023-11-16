@@ -18,5 +18,8 @@ class Position:
     def setPiece(self, piece: Piece):
         self._piece = piece
 
+    def getColor(self) -> Color:
+        return self._color
+
     def getCoordenates(self) -> tuple:
         return self._coordenates

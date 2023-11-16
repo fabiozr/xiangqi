@@ -1,4 +1,5 @@
 from problemdomain.pieces.Piece import Piece
+from problemdomain.Color import Color
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
     from problemdomain.Player import Player
@@ -13,6 +14,7 @@ class Elephant(Piece):
     ) -> list["Position"]:
         reachable_positions = []
         x, y = position.getCoordenates()
+        color = position.getPiece().getPlayer().getColor()
         orthogonal_coords = [(x + ox, y + oy) for ox, oy in [(1, 1), (1, -1), (-1, 1), (-1, -1)]]
 
         possible_coords = [(x+dx, y+dy) for dx, dy in [(2, 2), (2, -2), (-2, 2), (-2, -2)]]
@@ -22,7 +24,8 @@ class Elephant(Piece):
             x, y = possible_coords[i]
             ox, oy = orthogonal_coords[i]
 
-            condition = 5 <= x < 10 and 0 <= y < 9 and matrix_board[ox][oy].getPiece() == None
+            condition = 0 <= x < 10 and 0 <= y < 9 and color == matrix_board[x][y].getColor() \
+                        and matrix_board[ox][oy].getPiece() == None
 
             if condition:
                 reachable_positions.append(matrix_board[x][y])
