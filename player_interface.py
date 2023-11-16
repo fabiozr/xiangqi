@@ -4,6 +4,7 @@ from dog.dog_actor import DogActor
 from dog.start_status import StartStatus
 from uuid import uuid4
 from random import choice
+from threading import Thread
 
 from queue import Queue
 from time import sleep, time
@@ -97,8 +98,12 @@ class PlayerInterface(DogPlayerInterface):
         return 9 - x, 8 - y
 
     def sendMove(self, move: dict):
-        self.dog_sever_interface.send_move({"type": "move", "origin": move['origin'],
-                                            'destiny': move['destiny'], "match_status": "next"})
+        # Usa uma thread pra evitar que a interface fique congelada enquanto um movimento é enviado.
+        Thread(
+            target=self.dog_sever_interface.send_move,
+            args=({"type": "move", "origin": move['origin'],
+                                            'destiny': move['destiny'], "match_status": "next"},)
+        ).start()
 
     def selectPosition(self, line: int, column: int):
         self.board.selectPosition(line, column)
