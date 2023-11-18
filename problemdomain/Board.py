@@ -114,7 +114,6 @@ class Board:
         else:
             self._local_player.setTurn(True)
             self._remote_player.setTurn(False)
-        self._local_player, self._remote_player = self._remote_player, self._local_player
 
     def selectPosition(self, line: int, column: int):
         position = self.__getPosition(line - 1, column - 1)
@@ -146,6 +145,7 @@ class Board:
 
         origin: tuple[int, int] = move['origin']
         destiny: tuple[int, int] = move['destiny']
+        print(f"Movendo peça de {origin} para {destiny}")
 
         piece = self._positions[origin[0]][origin[1]].getPiece()
         player = piece.getPlayer()
@@ -222,7 +222,7 @@ class Board:
             cord_destiny = destiny.getCoordenates()
 
             self.makeMove({'origin': cord_origin, 'destiny': cord_destiny})
-            # self._player_interface.sendMove({'origin': cord_origin, 'destiny': cord_destiny})
+            self._player_interface.sendMove({'origin': cord_origin, 'destiny': cord_destiny})
 
     def __selectPiece(self, piece: Piece):
         self._local_player.setPiece(piece)

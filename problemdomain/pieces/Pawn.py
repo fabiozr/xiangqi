@@ -13,8 +13,10 @@ class Pawn(Piece):
     ) -> list["Position"]:
         reachable_positions = []
         x, y = position.getCoordenates()
-        possible_coords = [(x + dx, y + dy) for dx, dy in [(0, -1), (-1, 0), (0, 1)]] if x <= 4 else [(x-1, y)]
-
+        # Quando é jogador local, diminui x em 1. Senão, incrementa x em 1.
+        # O lado do jogador local começa de x = 9 para baixo.
+        up = -1 if matrix_board[9][0].getColor() == self._player.getColor() else 1
+        possible_coords = [(x + dx, y + dy) for dx, dy in [(0, -1), (up, 0), (0, 1)]] if position.getColor() != self.getPlayer().getColor()  else [(x-1, y)]
 
         for x, y in possible_coords:
             condition = 0 <= x < 10 and 0 <= y < 9
