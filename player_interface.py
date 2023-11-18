@@ -8,9 +8,7 @@ from threading import Thread
 
 from queue import Queue
 from time import sleep, time
-
 from problemdomain.Board import Board
-
 
 class PlayerInterface(DogPlayerInterface):
     game_interface: GameInterface
@@ -18,6 +16,7 @@ class PlayerInterface(DogPlayerInterface):
     dog_sever_interface: DogActor
     board: Board
     queue: Queue
+    __batch_moves: list[dict[str, any]]
 
 
     def __init__(self):
@@ -29,6 +28,7 @@ class PlayerInterface(DogPlayerInterface):
         player_name = self.generatePlayerName()
         message = self.dog_sever_interface.initialize(player_name, self)
         self.game_interface.showMessage(message)
+        self.__batch_moves = []
 
         self.board = Board(self)
         
@@ -44,10 +44,17 @@ class PlayerInterface(DogPlayerInterface):
             self.game_interface.showMessage("PARTIDA EM ANDAMENTO")
             return
 
-        start_status = self.dog_sever_interface.start_match(2)
-        code = start_status.get_code()
-        message = start_status.get_message()
+        begin = time()
+        code = None
+        message = None
+        while time() - begin < 5:
+            start_status = self.dog_sever_interface.start_match(2)
+            code = start_status.get_code()
+            message = start_status.get_message()
 
+            if code not in ('0', '1'):
+                break
+        
         if code in ('0', '1'):
             self.game_interface.showMessage(message)
         else:
@@ -86,22 +93,40 @@ class PlayerInterface(DogPlayerInterface):
         self.game_interface.placeBoardPieces()
 
     def receive_move(self, a_move: dict[str, str]):
-        if a_move.get("type") == "start":
+        if a_move["type"] == "start":
             self.queue.put(a_move["value"])
             return
-        elif a_move.get("type") == "move":
+        elif a_move["type"] == "move":
             print(a_move)
             self.board.makeMove({'origin': self.convertCoordinates(a_move['origin']),
                                  'destiny': self.convertCoordinates(a_move['destiny'])})
+        elif a_move["type"] == "batch":
+            for move in a_move["moves"]:
+                self.receive_move(move)
 
 
     def convertCoordinates(self, coord: tuple[int, int]):
         x, y = coord
         return 9 - x, 8 - y
 
-    def sendMove(self, move: dict):
+    
+    def __send_batch(self):
+        status = "next" if self.board.getMatchInProgress() else "finished"
+        self.dog_sever_interface.send_move(
+            {"type": "batch", 
+             "moves": self.__batch_moves, 
+             "match_status": status
+        })
+        self.__batch_moves.clear()
+    
+    def sendBatch(self):
         # Usa uma thread pra evitar que a interface fique congelada enquanto um movimento é enviado.
-        self.dog_sever_interface.send_move(move)
+        Thread(
+            target=self.__send_batch,
+        ).start()
+    
+    def addToBatch(self, move: dict[str, any]):
+        self.__batch_moves.append(move)
 
     def selectPosition(self, line: int, column: int):
         self.board.selectPosition(line, column)

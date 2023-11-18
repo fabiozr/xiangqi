@@ -88,7 +88,8 @@ class Board:
 
     def finishMatch(self):
         self._match_in_progress = False
-        self._player_interface.sendMove({"type": "game_over", "match_status": "finished"})
+        self._player_interface.addToBatch({"type": "game_over", "match_status": "finished"})
+        
 
     def startMatch(self, local_player: str, remote_player: str, local_color: str):
         local_color = Color[local_color]
@@ -118,7 +119,7 @@ class Board:
             if winner:
                 winner_player = self._local_player if self._local_player.getTurn() == True else self._remote_player
                 self.setWinner(winner_player)
-                self._player_interface.showMessage(f'O {winner_player.getColor()} VENCEU!!')
+                self._player_interface.showMessage(f'O {winner_player.getColor().name} VENCEU!!')
                 self.finishMatch()
 
         return draw or winner
@@ -176,6 +177,7 @@ class Board:
         self._player_interface.updateInterfaceMove(origin, destiny)
         self.evaluateMatchFinish()
         self.changeTurn()
+        self._player_interface.sendBatch()
 
     def receiveMove(self, move: dict):
         pass
@@ -239,7 +241,7 @@ class Board:
             cord_origin = origin.getCoordenates()
             cord_destiny = destiny.getCoordenates()
 
-            self._player_interface.sendMove({"type": "move", "origin": cord_origin,
+            self._player_interface.addToBatch({"type": "move", "origin": cord_origin,
                                              'destiny': cord_destiny, "match_status": "next"})
             self.makeMove({'origin': cord_origin, 'destiny': cord_destiny})
 
@@ -338,7 +340,7 @@ class Board:
 
         if all(len(self.calculatePossiblePositions(piece, True, False)) == 0 for piece in self.getPlayerPieces(player_not_in_turn)):
             return True
-        return False
+        return True
 
     def verifyPositionOccupiedByPlayer(self, destiny: Position, player: Player) -> bool:
         other_piece = destiny.getPiece()
