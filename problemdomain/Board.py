@@ -340,7 +340,7 @@ class Board:
 
         if all(len(self.calculatePossiblePositions(piece, True, False)) == 0 for piece in self.getPlayerPieces(player_not_in_turn)):
             return True
-        return True
+        return False
 
     def verifyPositionOccupiedByPlayer(self, destiny: Position, player: Player) -> bool:
         other_piece = destiny.getPiece()
