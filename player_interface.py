@@ -93,8 +93,6 @@ class PlayerInterface(DogPlayerInterface):
             print(a_move)
             self.board.makeMove({'origin': self.convertCoordinates(a_move['origin']),
                                  'destiny': self.convertCoordinates(a_move['destiny'])})
-        elif a_move.get("type") == "game_over":
-            print('a')
 
 
     def convertCoordinates(self, coord: tuple[int, int]):
