@@ -99,19 +99,9 @@ class PlayerInterface(DogPlayerInterface):
         x, y = coord
         return 9 - x, 8 - y
 
-    
-    def __send_move(self, move: dict[str, any], delay: float):
-        sleep(delay)
-        print(f"Enviando movimento... {move}")
-        self.dog_sever_interface.send_move(move)
-
-    
-    def sendMove(self, move: dict, delay: float = 0):
+    def sendMove(self, move: dict):
         # Usa uma thread pra evitar que a interface fique congelada enquanto um movimento é enviado.
-        Thread(
-            target=self.__send_move,
-            args=(move, delay)
-        ).start()
+        self.dog_sever_interface.send_move(move)
 
     def selectPosition(self, line: int, column: int):
         self.board.selectPosition(line, column)

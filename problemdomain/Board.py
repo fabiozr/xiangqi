@@ -88,7 +88,7 @@ class Board:
 
     def finishMatch(self):
         self._match_in_progress = False
-        self._player_interface.sendMove({"type": "game_over", "match_status": "finished"}, 1)
+        self._player_interface.sendMove({"type": "game_over", "match_status": "finished"})
 
     def startMatch(self, local_player: str, remote_player: str, local_color: str):
         local_color = Color[local_color]
@@ -118,7 +118,7 @@ class Board:
             if winner:
                 winner_player = self._local_player if self._local_player.getTurn() == True else self._remote_player
                 self.setWinner(winner_player)
-                self._player_interface.showMessage(f'O {winner_player.getColor().name} VENCEU!!')
+                self._player_interface.showMessage(f'O {winner_player.getColor()} VENCEU!!')
                 self.finishMatch()
 
         return draw or winner
@@ -174,8 +174,8 @@ class Board:
         self.__placePiece(origin, destiny)
         self._local_player.setPiece(None)
         self._player_interface.updateInterfaceMove(origin, destiny)
-        self.evaluateMatchFinish()
         self.changeTurn()
+        self.evaluateMatchFinish()
 
     def receiveMove(self, move: dict):
         pass
