@@ -11,6 +11,7 @@ class Piece:
     def __init__(self, player: "Player"):
         self._player = player
         self._possible_moves = None
+        print("AAAAAA")
 
     def verifyValidPosition(self, position: "Position") -> bool:
         return position in self._possible_moves

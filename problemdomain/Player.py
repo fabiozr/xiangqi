@@ -20,7 +20,7 @@ class Player:
 
     def verifyCheckOnLastThreeMoves(self, desnity: Position) -> bool:
         curr_destiny = desnity
-        check_on_last_three_moves = True
+        check_on_last_three_moves = len(self._last_three_moves) > 0
 
         for move in self._last_three_moves[::-1]:
             prev_check = move.getCheck()

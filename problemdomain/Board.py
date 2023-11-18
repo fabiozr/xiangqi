@@ -2,6 +2,7 @@ from problemdomain.Player import Player
 from problemdomain.pieces import *
 from problemdomain.Position import Position
 from problemdomain.Color import Color
+from problemdomain.Move import Move
 
 from typing import TYPE_CHECKING
 if TYPE_CHECKING:
@@ -113,6 +114,7 @@ class Board:
         else:
             self._local_player.setTurn(True)
             self._remote_player.setTurn(False)
+        self._local_player, self._remote_player = self._remote_player, self._local_player
 
     def selectPosition(self, line: int, column: int):
         position = self.__getPosition(line - 1, column - 1)
@@ -142,8 +144,15 @@ class Board:
 
     def makeMove(self, move: dict):
 
-        origin = move['origin']
-        destiny = move['destiny']
+        origin: tuple[int, int] = move['origin']
+        destiny: tuple[int, int] = move['destiny']
+
+        piece = self._positions[origin[0]][origin[1]].getPiece()
+        player = piece.getPlayer()
+        other_player = self._local_player if player == self._remote_player else self._remote_player
+        attacked = self.getAttackedPieces(origin)
+        move = Move(self._positions[origin[0]][origin[1]], self._positions[destiny[0]][destiny[1]], self.verifyCheck(other_player), attacked)
+        player.setMove(move)
 
         self.__placePiece(origin, destiny)
         self._local_player.setPiece(None)
@@ -159,7 +168,49 @@ class Board:
     # Métodos relacionados às peças e posições
     def calculatePossiblePositions(self, piece: Piece, verify_check: bool, verify_protected: bool) -> list[Position]:
         origin = self.getPiecePosition(piece)
-        return piece.getReachablePositions(origin, self._positions)
+        posible_reachable_position = piece.getReachablePositions(origin, self._positions)
+        player = piece.getPlayer()
+
+        reachable_positions = []
+
+        if verify_check and verify_protected:
+            print(f"Peça selecionada: {type(piece)}\nDestinos: \n")
+        
+        for destiny in posible_reachable_position:
+            coord_destiny = destiny.getCoordenates()
+
+            occupied = self.verifyPositionOccupiedByPlayer(destiny, player)
+            protected = None
+            visible = None
+            consecutive_check = None
+            check = None
+
+            if not occupied: 
+                protected = self.verifyPieceThreat(destiny, piece) if verify_protected else False
+                if not verify_protected or not protected:
+                    other_piece = destiny.getPiece()
+                    origin.setPiece(None)
+                    destiny.setPiece(piece)
+                    
+                    consecutive_check = self.verifyConsecutiveChecks(destiny, piece) if verify_check else False
+                    if not verify_check or not consecutive_check:
+                        visible = self.verifyVisibleKings()
+                        if not visible:
+                            check = self.verifyCheck(player) if verify_check else False
+                            if not verify_check or not check:
+                                reachable_positions.append(destiny)
+                            
+                    origin.setPiece(piece)
+                    destiny.setPiece(other_piece)
+
+            if verify_check and verify_protected:
+                print(f"Posição: {coord_destiny}")
+                print(f"Occupied: {occupied}\nprotected: {protected}\nconsecutive_check: {consecutive_check}\nvisible: {visible}\ncheck: {check}\n")
+
+        if verify_check and verify_protected:    
+            print("="*30 + '\n')
+        
+        return reachable_positions
 
     def __movePiece(self, piece: Piece, destiny: Position):
         valid = piece.verifyValidPosition(destiny)
@@ -171,7 +222,7 @@ class Board:
             cord_destiny = destiny.getCoordenates()
 
             self.makeMove({'origin': cord_origin, 'destiny': cord_destiny})
-            self._player_interface.sendMove({'origin': cord_origin, 'destiny': cord_destiny})
+            # self._player_interface.sendMove({'origin': cord_origin, 'destiny': cord_destiny})
 
     def __selectPiece(self, piece: Piece):
         self._local_player.setPiece(piece)
@@ -206,8 +257,19 @@ class Board:
                     pieces.append(pos.getPiece())
         return pieces
 
-    def getAttackedPieces(self, coordinates: tuple) -> list[Piece]:
-        pass
+    def getAttackedPieces(self, coordinates: tuple[int, int]) -> list[Piece]:
+        i, j = coordinates
+        pos = self._positions[i][j]
+        piece = pos.getPiece()
+
+        if not piece:
+            return []
+        
+        attacked = []
+        for pos in self.calculatePossiblePositions(piece, True, True):
+            if pos.getPiece():
+                attacked.append(pos.getPiece())
+        return attacked
 
     def getPiecePosition(self, piece: Piece) -> Position:
         for i in range(10):
@@ -228,6 +290,7 @@ class Board:
                     piece_player = piece.getPlayer()
                     if piece_player == player:
                         king_pos = pos
+                        break
         
         opponent_pieces = None
         if player == self._local_player:
@@ -239,6 +302,7 @@ class Board:
             posible_positions = self.calculatePossiblePositions(piece, False, False)
             for pos in posible_positions:
                 if king_pos == pos:
+                    print(f"Check!!!\nPiece: {type(piece)}\nPiece pos: {self.getPiecePosition(piece).getCoordenates()}\nKing pos: {king_pos.getCoordenates()}\nReachable positions: {[p.getCoordenates() for p in posible_positions]}")
                     return True
         
         return False
@@ -274,6 +338,9 @@ class Board:
 
     def verifyPieceThreat(self, destiny: Position, piece: Piece) -> bool:
         player = piece.getPlayer()
+        if not len(player.getMoves()):
+            return False
+        
         protected = self.verifyIfPositionIsProtected(destiny, player)
 
         attacked_piece = destiny.getPiece()
@@ -314,3 +381,4 @@ class Board:
                             return True
                         if piece_to_view and not isinstance(piece_to_view, King):
                             return False
+        return False

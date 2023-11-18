@@ -33,7 +33,9 @@ class PlayerInterface(DogPlayerInterface):
         self.board = Board(self)
         
         if message == "Conectado a Dog Server":
+            Thread(target=self.start_match).start()
             self.game_interface.run()
+
         
 
     def generatePlayerName(self) -> str:
@@ -49,8 +51,8 @@ class PlayerInterface(DogPlayerInterface):
         
 
         if code in ('0', '1'):
-            self.game_interface.showMessage(message)
-        else:
+            # self.game_interface.showMessage(message)
+        # else:
 
             color = choice(["RED", "BLACK"])
             other_color = "RED" if color == "BLACK" else "BLACK"
@@ -80,9 +82,11 @@ class PlayerInterface(DogPlayerInterface):
 
 
     def initializeMatch(self, start_status: StartStatus, color: str):
-        local_player, remote_player = start_status.get_players()
-        self.board.startMatch(local_player, remote_player, color)
-        self.game_interface.setLocalColor(color)
+        # local_player, remote_player = start_status.get_players()
+        local_player, remote_player = ["A", "A", "A"], ["B"]*3
+        self.board.startMatch(local_player, remote_player, "RED")
+    
+        self.game_interface.setLocalColor("RED")
         self.game_interface.placeBoardPieces()
 
     def receive_move(self, a_move: dict[str, str]):
