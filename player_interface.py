@@ -139,6 +139,10 @@ class PlayerInterface(DogPlayerInterface):
 
     def showMessage(self, message: str):
         self.game_interface.showMessage(message)
+    
+    def receive_withdrawal_notification(self):
+        self.board.finishMatch()
+        self.game_interface.showMessage("O jogador adversário desistiu!!")
 
 
     
