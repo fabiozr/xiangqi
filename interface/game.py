@@ -64,19 +64,6 @@ class GameInterface(Tk):
             "r_b": self._load_image("images/Rook-Black.png"),
         }
 
-        self.board_state = [
-            ["r_b", "h_b", "e_b", "a_b", "k_b", "a_b", "e_b", "h_b", "r_b"],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, "c_b", 0, 0, 0, 0, 0, "c_b", 0],
-            ["p_b", 0, "p_b", 0, "p_b", 0, "p_b", 0, "p_b"],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            ["p_r", 0, "p_r", 0, "p_r", 0, "p_r", 0, "p_r"],
-            [0, "c_r", 0, 0, 0, 0, 0, "c_r", 0],
-            [0, 0, 0, 0, 0, 0, 0, 0, 0],
-            ["r_r", "h_r", "e_r", "a_r", "k_r", "a_r", "e_r", "h_r", "r_r"],
-        ]
-
     def _initialize_window(self):
         self.title(WINDOW_TITLE)
         self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
@@ -93,6 +80,21 @@ class GameInterface(Tk):
             label=MENU_NEW_GAME_TEXT,
             command=lambda: self.player_interface.start_match(),
         )
+
+    def initializeBoard(self):
+        self.canvas.delete(PIECES_TAG)
+        self.board_state = [
+            ["r_b", "h_b", "e_b", "a_b", "k_b", "a_b", "e_b", "h_b", "r_b"],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, "c_b", 0, 0, 0, 0, 0, "c_b", 0],
+            ["p_b", 0, "p_b", 0, "p_b", 0, "p_b", 0, "p_b"],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ["p_r", 0, "p_r", 0, "p_r", 0, "p_r", 0, "p_r"],
+            [0, "c_r", 0, 0, 0, 0, 0, "c_r", 0],
+            [0, 0, 0, 0, 0, 0, 0, 0, 0],
+            ["r_r", "h_r", "e_r", "a_r", "k_r", "a_r", "e_r", "h_r", "r_r"],
+        ]
 
     def showMessage(self, message: str):
         messagebox.showinfo("information", message)

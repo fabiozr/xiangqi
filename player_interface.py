@@ -41,12 +41,12 @@ class PlayerInterface(DogPlayerInterface):
 
     def start_match(self):
         if self.board.getMatchInProgress():
+            self.game_interface.showMessage("PARTIDA EM ANDAMENTO")
             return
 
         start_status = self.dog_sever_interface.start_match(2)
         code = start_status.get_code()
         message = start_status.get_message()
-        
 
         if code in ('0', '1'):
             self.game_interface.showMessage(message)
@@ -81,6 +81,7 @@ class PlayerInterface(DogPlayerInterface):
     def initializeMatch(self, start_status: StartStatus, color: str):
         local_player, remote_player = start_status.get_players()
         self.board.startMatch(local_player, remote_player, color)
+        self.game_interface.initializeBoard()
         self.game_interface.setLocalColor(color)
         self.game_interface.placeBoardPieces()
 
@@ -89,8 +90,12 @@ class PlayerInterface(DogPlayerInterface):
             self.queue.put(a_move["value"])
             return
         elif a_move.get("type") == "move":
+            print(a_move)
             self.board.makeMove({'origin': self.convertCoordinates(a_move['origin']),
                                  'destiny': self.convertCoordinates(a_move['destiny'])})
+        elif a_move.get("type") == "game_over":
+            print('a')
+
 
     def convertCoordinates(self, coord: tuple[int, int]):
         x, y = coord
@@ -98,11 +103,13 @@ class PlayerInterface(DogPlayerInterface):
 
     def sendMove(self, move: dict):
         # Usa uma thread pra evitar que a interface fique congelada enquanto um movimento é enviado.
-        Thread(
-            target=self.dog_sever_interface.send_move,
-            args=({"type": "move", "origin": move['origin'],
-                                            'destiny': move['destiny'], "match_status": "next"},)
-        ).start()
+        if move["type"] == "game_over":
+            print('game_over')
+            sleep(3)
+            self.dog_sever_interface.send_move(move)
+        elif move["type"] == "move":
+            print('JOGADA')
+            self.dog_sever_interface.send_move(move)
 
     def selectPosition(self, line: int, column: int):
         self.board.selectPosition(line, column)
@@ -112,6 +119,9 @@ class PlayerInterface(DogPlayerInterface):
 
     def updateInterfaceMove(self, origin: tuple[int, int], destiny: tuple[int, int]):
         self.game_interface.updateInterfaceMove(origin, destiny)
+
+    def showMessage(self, message: str):
+        self.game_interface.showMessage(message)
 
 
     

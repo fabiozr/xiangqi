@@ -14,11 +14,9 @@ class Elephant(Piece):
     ) -> list["Position"]:
         reachable_positions = []
         x, y = position.getCoordenates()
-        color = position.getPiece().getPlayer().getColor()
+        color = self._player.getColor()
         orthogonal_coords = [(x + ox, y + oy) for ox, oy in [(1, 1), (1, -1), (-1, 1), (-1, -1)]]
-
         possible_coords = [(x+dx, y+dy) for dx, dy in [(2, 2), (2, -2), (-2, 2), (-2, -2)]]
-
 
         for i in range(len(possible_coords)):
             x, y = possible_coords[i]

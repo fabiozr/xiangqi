@@ -87,7 +87,8 @@ class Board:
         positions[7][7] = Position(color2, Cannon(player2), (7, 7))
 
     def finishMatch(self):
-        pass
+        self._match_in_progress = False
+        self._player_interface.sendMove({"type": "game_over", "match_status": "finished"})
 
     def startMatch(self, local_player: str, remote_player: str, local_color: str):
         local_color = Color[local_color]
@@ -97,15 +98,30 @@ class Board:
 
         self._local_player = Player(local_player, local_turn, local_color)
         self._remote_player = Player(remote_player, not local_turn, remote_color)
-
+        self._match_in_progress = True
         self._positions = self.initialize_position_matrix()
-        
 
     def setWinner(self, player: Player):
-        pass
+        self._winner = player
 
     def evaluateMatchFinish(self) -> bool:
-        ...
+        draw = self.verifyDraw()
+
+        if draw:
+            self.setWinner(None)
+            self._player_interface.showMessage('OCORREU EMPATE')
+            self.finishMatch()
+
+        else:
+            winner = self.verifyWinner()
+
+            if winner:
+                winner_player = self._local_player if self._local_player.getTurn() == True else self._remote_player
+                self.setWinner(winner_player)
+                self._player_interface.showMessage(f'O {winner_player.getColor()} VENCEU!!')
+                self.finishMatch()
+
+        return draw or winner
 
     def changeTurn(self):
         if self._local_player.getTurn() == True:
@@ -119,27 +135,28 @@ class Board:
         position = self.__getPosition(line - 1, column - 1)
         local_turn = self._local_player.getTurn()
 
-        if local_turn:
-            piece = position.getPiece()
+        if self._match_in_progress:
+            if local_turn:
+                piece = position.getPiece()
 
-            if piece != None:
-                player = piece.getPlayer()
+                if piece != None:
+                    player = piece.getPlayer()
 
-                if player != self._local_player:
+                    if player != self._local_player:
+                        piece_selected = self._local_player.getPiece()
+
+                        if piece_selected != None:
+                            print('Mover peça')
+                            self.__movePiece(piece_selected, position)
+                    else:
+                        print('Selecionar peça')
+                        self.__selectPiece(piece)
+                else:
                     piece_selected = self._local_player.getPiece()
 
                     if piece_selected != None:
                         print('Mover peça')
                         self.__movePiece(piece_selected, position)
-                else:
-                    print('Selecionar peça')
-                    self.__selectPiece(piece)
-            else:
-                piece_selected = self._local_player.getPiece()
-
-                if piece_selected != None:
-                    print('Mover peça')
-                    self.__movePiece(piece_selected, position)
 
     def makeMove(self, move: dict):
 
@@ -158,6 +175,9 @@ class Board:
         self._local_player.setPiece(None)
         self._player_interface.updateInterfaceMove(origin, destiny)
         self.changeTurn()
+        self.evaluateMatchFinish()
+        # Terminando partida na primeira jogada para teste
+        self.finishMatch()
 
     def receiveMove(self, move: dict):
         pass
@@ -221,8 +241,9 @@ class Board:
             cord_origin = origin.getCoordenates()
             cord_destiny = destiny.getCoordenates()
 
+            self._player_interface.sendMove({"type": "move", "origin": cord_origin,
+                                             'destiny': cord_destiny, "match_status": "next"})
             self.makeMove({'origin': cord_origin, 'destiny': cord_destiny})
-            self._player_interface.sendMove({'origin': cord_origin, 'destiny': cord_destiny})
 
     def __selectPiece(self, piece: Piece):
         self._local_player.setPiece(piece)
@@ -310,16 +331,15 @@ class Board:
 
     def verifyDraw(self) -> bool:
         for piece in self.getAllPieces():
-            if piece in (Cannon, Horse, Rook, Pawn):
+            if isinstance(piece, (Cannon, Horse, Rook, Pawn)):
                 return False
         return True
 
     def verifyWinner(self) -> bool:
         player_not_in_turn = self._local_player if not self._local_player.getTurn() else self._remote_player
 
-        for piece in self.getPlayerPieces(player_not_in_turn):
-            if len(self.calculatePossiblePositions(piece)) == 0:
-                return True
+        if all(len(self.calculatePossiblePositions(piece, True, False)) == 0 for piece in self.getPlayerPieces(player_not_in_turn)):
+            return True
         return False
 
     def verifyPositionOccupiedByPlayer(self, destiny: Position, player: Player) -> bool:
