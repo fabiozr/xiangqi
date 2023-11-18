@@ -103,13 +103,7 @@ class PlayerInterface(DogPlayerInterface):
 
     def sendMove(self, move: dict):
         # Usa uma thread pra evitar que a interface fique congelada enquanto um movimento é enviado.
-        if move["type"] == "game_over":
-            print('game_over')
-            sleep(3)
-            self.dog_sever_interface.send_move(move)
-        elif move["type"] == "move":
-            print('JOGADA')
-            self.dog_sever_interface.send_move(move)
+        self.dog_sever_interface.send_move(move)
 
     def selectPosition(self, line: int, column: int):
         self.board.selectPosition(line, column)

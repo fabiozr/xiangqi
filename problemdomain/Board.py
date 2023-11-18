@@ -176,8 +176,6 @@ class Board:
         self._player_interface.updateInterfaceMove(origin, destiny)
         self.changeTurn()
         self.evaluateMatchFinish()
-        # Terminando partida na primeira jogada para teste
-        self.finishMatch()
 
     def receiveMove(self, move: dict):
         pass
