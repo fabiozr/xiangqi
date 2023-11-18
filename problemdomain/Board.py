@@ -174,8 +174,8 @@ class Board:
         self.__placePiece(origin, destiny)
         self._local_player.setPiece(None)
         self._player_interface.updateInterfaceMove(origin, destiny)
-        self.changeTurn()
         self.evaluateMatchFinish()
+        self.changeTurn()
 
     def receiveMove(self, move: dict):
         pass
