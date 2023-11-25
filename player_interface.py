@@ -11,44 +11,43 @@ from time import sleep, time
 from problemdomain.Board import Board
 
 class PlayerInterface(DogPlayerInterface):
-    game_interface: GameInterface
-    player_name: str
-    dog_sever_interface: DogActor
-    board: Board
-    queue: Queue
+    _game_interface: GameInterface
+    _dog_server_interface: DogActor
+    _board: Board
+    __queue: Queue
     __batch_moves: list[dict[str, any]]
 
 
     def __init__(self):
-        self.game_interface = GameInterface(self)
-        self.queue = Queue()
+        self._game_interface = GameInterface(self)
+        self.__queue = Queue()
 
         # Estabelecer conexão
-        self.dog_sever_interface = DogActor()
+        self._dog_server_interface = DogActor()
         player_name = self.generatePlayerName()
-        message = self.dog_sever_interface.initialize(player_name, self)
-        self.game_interface.showMessage(message)
+        message = self._dog_server_interface.initialize(player_name, self)
+        self._game_interface.showMessage(message)
         self.__batch_moves = []
 
-        self.board = Board(self)
+        self._board = Board(self)
         
         if message == "Conectado a Dog Server":
-            self.game_interface.run()
+            self._game_interface.run()
         
 
     def generatePlayerName(self) -> str:
         return str(uuid4())
 
     def start_match(self):
-        if self.board.getMatchInProgress():
-            self.game_interface.showMessage("PARTIDA EM ANDAMENTO")
+        if self._board.getMatchInProgress():
+            self._game_interface.showMessage("PARTIDA EM ANDAMENTO")
             return
 
         begin = time()
         code = None
         message = None
         while time() - begin < 5:
-            start_status = self.dog_sever_interface.start_match(2)
+            start_status = self._dog_server_interface.start_match(2)
             code = start_status.get_code()
             message = start_status.get_message()
 
@@ -56,11 +55,11 @@ class PlayerInterface(DogPlayerInterface):
                 break
         
         if code in ('0', '1'):
-            self.game_interface.showMessage(message)
+            self._game_interface.showMessage(message)
         else:
             color = choice(["RED", "BLACK"])
             other_color = "RED" if color == "BLACK" else "BLACK"
-            self.dog_sever_interface.send_move({"type": "start", "value": other_color, "match_status": "next"})
+            self._dog_server_interface.send_move({"type": "start", "value": other_color, "match_status": "next"})
             self.initializeMatch(start_status, color)
 
 
@@ -69,17 +68,17 @@ class PlayerInterface(DogPlayerInterface):
         begin = time()
         color = None
         while time() - begin < 60:
-            self.dog_sever_interface.proxy.match_status()
+            self._dog_server_interface.proxy.match_status()
 
             try:
-                color = self.queue.get_nowait()
+                color = self.__queue.get_nowait()
                 break
             except:
                 sleep(0.2)
                 continue
 
         if color is None:
-            self.game_interface.showMessage("Timeout!")
+            self._game_interface.showMessage("Timeout!")
             return
 
         self.initializeMatch(start_status, color)
@@ -87,18 +86,18 @@ class PlayerInterface(DogPlayerInterface):
 
     def initializeMatch(self, start_status: StartStatus, color: str):
         local_player, remote_player = start_status.get_players()
-        self.board.startMatch(local_player, remote_player, color)
-        self.game_interface.initializeBoard()
-        self.game_interface.setLocalColor(color)
-        self.game_interface.placeBoardPieces()
+        self._board.startMatch(local_player, remote_player, color)
+        self._game_interface.initializeBoard()
+        self._game_interface.setLocalColor(color)
+        self._game_interface.placeBoardPieces()
 
     def receive_move(self, a_move: dict[str, str]):
         if a_move["type"] == "start":
-            self.queue.put(a_move["value"])
+            self.__queue.put(a_move["value"])
             return
         elif a_move["type"] == "move":
             print(a_move)
-            self.board.makeMove({'origin': self.convertCoordinates(a_move['origin']),
+            self._board.makeMove({'origin': self.convertCoordinates(a_move['origin']),
                                  'destiny': self.convertCoordinates(a_move['destiny'])})
         elif a_move["type"] == "batch":
             for move in a_move["moves"]:
@@ -111,8 +110,8 @@ class PlayerInterface(DogPlayerInterface):
 
     
     def __send_batch(self):
-        status = "next" if self.board.getMatchInProgress() else "finished"
-        self.dog_sever_interface.send_move(
+        status = "next" if self._board.getMatchInProgress() else "finished"
+        self._dog_server_interface.send_move(
             {"type": "batch", 
              "moves": self.__batch_moves, 
              "match_status": status
@@ -129,20 +128,20 @@ class PlayerInterface(DogPlayerInterface):
         self.__batch_moves.append(move)
 
     def selectPosition(self, line: int, column: int):
-        self.board.selectPosition(line, column)
+        self._board.selectPosition(line, column)
 
     def showValidPositions(self, positions: list[tuple[int, int]]):
-        self.game_interface.showValidPosition(positions)
+        self._game_interface.showValidPosition(positions)
 
     def updateInterfaceMove(self, origin: tuple[int, int], destiny: tuple[int, int]):
-        self.game_interface.updateInterfaceMove(origin, destiny)
+        self._game_interface.updateInterfaceMove(origin, destiny)
 
     def showMessage(self, message: str):
-        self.game_interface.showMessage(message)
+        self._game_interface.showMessage(message)
     
     def receive_withdrawal_notification(self):
-        self.board.finishMatch()
-        self.game_interface.showMessage("O jogador adversário desistiu!!")
+        self._board.finishMatch()
+        self._game_interface.showMessage("O jogador adversário desistiu!!")
 
 
     

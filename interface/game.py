@@ -18,25 +18,25 @@ if TYPE_CHECKING:
 
 
 class GameInterface(Tk):
-    player_interface: "PlayerInterface"
-    frame: Frame
-    canvas: Canvas
-    images: dict[str, PhotoImage]
-    local_color: str
+    _player_interface: "PlayerInterface"
+    _frame: Frame
+    _canvas: Canvas
+    _images: dict[str, PhotoImage]
+    _local_color: str
 
     def __init__(self, player_interface: "PlayerInterface"):
         super().__init__()
 
         self._initialize_window()
         self._initialize_menu()
-        self.frame = Frame(
+        self._frame = Frame(
             self,
             bg=BACKGROUND_COLOR,
             padx=CELL_SIZE / 2,
             pady=CELL_SIZE / 2,
         )
-        self.canvas = Canvas(
-            self.frame,
+        self._canvas = Canvas(
+            self._frame,
             width=NUMBER_OF_COLUMNS * CELL_SIZE,
             height=NUMBER_OF_ROWS * CELL_SIZE,
             borderwidth=0,
@@ -44,10 +44,10 @@ class GameInterface(Tk):
             bg=BOARD_COLOR,
         )
         self._draw_grid()
-        self.canvas.pack()
-        self.player_interface = player_interface
+        self._canvas.pack()
+        self._player_interface = player_interface
 
-        self.images = {
+        self._images = {
             "p_b": self._load_image("images/Pawn-Black.png"),
             "p_r": self._load_image("images/Pawn-Red.png"),
             "a_b": self._load_image("images/Advisor-Black.png"),
@@ -78,11 +78,11 @@ class GameInterface(Tk):
         menu.add_cascade(label=MENU_OPTION_TEXT, menu=file_menu)
         file_menu.add_command(
             label=MENU_NEW_GAME_TEXT,
-            command=lambda: self.player_interface.start_match(),
+            command=lambda: self._player_interface.start_match(),
         )
 
     def initializeBoard(self):
-        self.canvas.delete(PIECES_TAG)
+        self._canvas.delete(PIECES_TAG)
         self.board_state = [
             ["r_b", "h_b", "e_b", "a_b", "k_b", "a_b", "e_b", "h_b", "r_b"],
             [0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -101,10 +101,10 @@ class GameInterface(Tk):
 
     
     def setLocalColor(self, color: str):
-        self.local_color = color
+        self._local_color = color
 
     def placeBoardPieces(self):
-        if self.local_color != "RED":
+        if self._local_color != "RED":
             l = 0
             r = len(self.board_state) - 1
 
@@ -116,7 +116,7 @@ class GameInterface(Tk):
         for i, row in enumerate(self.board_state):
             for j, cell in enumerate(row):
                 if cell:
-                    image = self.images[cell]
+                    image = self._images[cell]
                     piece = self._place_piece(image, j + 1, i + 1)
                     self.board_state[i][j] = piece
         self.add_click_handlers()
@@ -124,7 +124,7 @@ class GameInterface(Tk):
     def clickPosition(self, event: Event):
         self._delete_dots()
         column, row = self._get_grid_position_from_event(event)
-        self.player_interface.selectPosition(row, column)
+        self._player_interface.selectPosition(row, column)
 
     def updateInterfaceMove(self, origin: tuple[int, int], destiny: tuple[int, int]):
         piece_origin = self._get_piece_on_square(origin[1]+1, origin[0]+1)
@@ -154,13 +154,6 @@ class GameInterface(Tk):
         ]
         return dots_in_column + dots_in_row
 
-    def move_piece(self, event: Event, piece):
-        column, row = self._get_grid_position_from_event(event)
-        piece_on_square = self._get_piece_on_square(column, row)
-        if piece_on_square and piece_on_square != piece:
-            self._delete_piece(piece_on_square)
-        self._move_piece(piece, column, row)
-        self._delete_dots()
 
     def add_click_handlers(self):
         for i, row in enumerate(self.board_state):
@@ -170,8 +163,8 @@ class GameInterface(Tk):
                     self._make_clickable(piece, self.clickPosition)
 
     def run(self):
-        self.frame.pack(side=LEFT, fill=BOTH)
-        self.frame.pack(side=RIGHT, fill=BOTH, expand=True)
+        self._frame.pack(side=LEFT, fill=BOTH)
+        self._frame.pack(side=RIGHT, fill=BOTH, expand=True)
         # self.placeBoardPieces()
         # self.add_click_handlers()
         self.mainloop()
@@ -187,7 +180,7 @@ class GameInterface(Tk):
             for row in range(NUMBER_OF_ROWS):
                 if column in [0, 9] or row in [0, 10]:
                     continue
-                self.canvas.create_rectangle(
+                self._canvas.create_rectangle(
                     column * CELL_SIZE,
                     row * CELL_SIZE,
                     (column + 1) * CELL_SIZE - 1,
@@ -197,7 +190,7 @@ class GameInterface(Tk):
                 )
 
     def _draw_river(self):
-        self.canvas.create_rectangle(
+        self._canvas.create_rectangle(
             1 * CELL_SIZE,
             5 * CELL_SIZE,
             9 * CELL_SIZE - 1,
@@ -208,7 +201,7 @@ class GameInterface(Tk):
         )
 
     def _draw_palace(self, start_row: int):
-        self.canvas.create_line(
+        self._canvas.create_line(
             4 * CELL_SIZE,
             start_row * CELL_SIZE,
             6 * CELL_SIZE,
@@ -216,7 +209,7 @@ class GameInterface(Tk):
             fill=GRID_COLOR,
             width=CELL_WIDTH,
         )
-        self.canvas.create_line(
+        self._canvas.create_line(
             6 * CELL_SIZE,
             start_row * CELL_SIZE,
             4 * CELL_SIZE,
@@ -244,23 +237,23 @@ class GameInterface(Tk):
 
     def _place_piece(self, image: ImageTk.PhotoImage, column: int, row: int):
         x, y = self._get_absolute_position(column, row)
-        return self.canvas.create_image(x, y, image=image, tags=PIECES_TAG)
+        return self._canvas.create_image(x, y, image=image, tags=PIECES_TAG)
 
     def _move_piece(self, piece_id: str, column: int, row: int):
         x, y = self._get_absolute_position(column, row)
-        self.canvas.coords(piece_id, x, y)
+        self._canvas.coords(piece_id, x, y)
 
     def _get_current_piece(self):
-        return self.canvas.find_withtag(CURRENT_TAG)[0]
+        return self._canvas.find_withtag(CURRENT_TAG)[0]
 
     def _delete_piece(self, piece_id: str | int):
-        self.canvas.delete(piece_id)
+        self._canvas.delete(piece_id)
 
     def _get_piece_on_square(self, column: int, row: int):
         x, y = self._get_absolute_position(column, row)
-        items = self.canvas.find_overlapping(x, y, x, y)
+        items = self._canvas.find_overlapping(x, y, x, y)
 
-        pieces = self.canvas.find_withtag(PIECES_TAG)
+        pieces = self._canvas.find_withtag(PIECES_TAG)
 
         for item_id in items:
             if item_id in pieces:
@@ -268,7 +261,7 @@ class GameInterface(Tk):
 
     def _place_dot(self, column: int, row: int):
         x, y = self._get_absolute_position(column, row)
-        return self.canvas.create_oval(
+        return self._canvas.create_oval(
             x - DOT_WIDTH - 2,
             y - DOT_WIDTH,
             x + DOT_WIDTH,
@@ -278,15 +271,15 @@ class GameInterface(Tk):
         )
 
     def _delete_dots(self):
-        self.canvas.delete(DOTS_TAG)
+        self._canvas.delete(DOTS_TAG)
 
     def _make_clickable(self, id: int, callback: Callable):
-        self.canvas.tag_bind(id, "<Button-1>", callback)
-        self.canvas.tag_bind(id, "<Enter>", lambda _: self._make_cursor_clickable())
-        self.canvas.tag_bind(id, "<Leave>", lambda _: self._reset_cursor())
+        self._canvas.tag_bind(id, "<Button-1>", callback)
+        self._canvas.tag_bind(id, "<Enter>", lambda _: self._make_cursor_clickable())
+        self._canvas.tag_bind(id, "<Leave>", lambda _: self._reset_cursor())
 
     def _make_cursor_clickable(self):
-        self.canvas.config(cursor="hand2")
+        self._canvas.config(cursor="hand2")
 
     def _reset_cursor(self):
-        self.canvas.config(cursor="")
+        self._canvas.config(cursor="")
