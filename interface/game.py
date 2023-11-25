@@ -105,13 +105,7 @@ class GameInterface(Tk):
 
     def placeBoardPieces(self):
         if self._local_color != "RED":
-            l = 0
-            r = len(self.board_state) - 1
-
-            while l < r:
-                self.board_state[l], self.board_state[r] = self.board_state[r], self.board_state[l]
-                l += 1
-                r -= 1
+            self.board_state = self.board_state[::-1]
 
         for i, row in enumerate(self.board_state):
             for j, cell in enumerate(row):
