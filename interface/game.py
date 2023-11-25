@@ -155,24 +155,12 @@ class GameInterface(Tk):
         return dots_in_column + dots_in_row
 
     def move_piece(self, event: Event, piece):
-        """
-        TODO: As posições no tabuleiro local são diferentes. 
-              Por exemplo, a linha 0 no tabuleiro do RED corresponde à linha 9.
-                
-              Para compensar isso, temos que aplicar a função self._transform nas coordenadas!!
-
-        """
         column, row = self._get_grid_position_from_event(event)
         piece_on_square = self._get_piece_on_square(column, row)
         if piece_on_square and piece_on_square != piece:
             self._delete_piece(piece_on_square)
         self._move_piece(piece, column, row)
         self._delete_dots()
-
-    def _transform(self, coords: tuple[int, int]) -> tuple[int, int]:
-        if self.local_color == "RED":
-            return coords
-        return 9 - coords[0], coords[1] # Aaaacho que ta certo. Mas nao testei
 
     def add_click_handlers(self):
         for i, row in enumerate(self.board_state):

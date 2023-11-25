@@ -102,7 +102,7 @@ class Board:
         self._match_in_progress = True
         self._positions = self.initialize_position_matrix()
 
-    def setWinner(self, player: Player):
+    def setWinner(self, player: Player | None):
         self._winner = player
 
     def evaluateMatchFinish(self) -> bool:
@@ -178,9 +178,6 @@ class Board:
         self.evaluateMatchFinish()
         self.changeTurn()
         self._player_interface.sendBatch()
-
-    def receiveMove(self, move: dict):
-        pass
 
     def getMatchInProgress(self) -> bool:
         return self._match_in_progress
